@@ -1,8 +1,7 @@
-﻿using FluentValidation;
-using MediatR;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 using Template.Application.Common.Behaviours;
+using Template.Application.Infrastructure;
 using Template.WebUI.Shared.Common.Behaviours;
 
 namespace Template.Application
@@ -17,8 +16,8 @@ namespace Template.Application
                     .AddTransient(typeof(IPipelineBehavior<,>), typeof(UnhandledExceptionBehaviour<,>))
                     .AddTransient(typeof(IPipelineBehavior<,>), typeof(AuthorizationBehaviour<,>))
                     .AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>))
-                    .AddTransient(typeof(IPipelineBehavior<,>), typeof(PerformanceBehaviour<,>));
-                    //.AddTransient<ITokenGeneratorService, TokenGeneratorService>();
+                    .AddTransient(typeof(IPipelineBehavior<,>), typeof(PerformanceBehaviour<,>))
+                    .AddTransient<ITokenGeneratorService, TokenGeneratorService>();
 
             return services;
         }

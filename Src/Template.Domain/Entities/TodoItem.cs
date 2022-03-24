@@ -1,4 +1,5 @@
 ﻿using Template.Domain.Common;
+using Template.Domain.Events;
 
 namespace Template.Domain.Entities
 {
@@ -6,16 +7,31 @@ namespace Template.Domain.Entities
     {
         public int ListId { get; set; }
 
-        public string Title { get; set; } = default!;
+        public string? Title { get; set; }
 
         public string? Note { get; set; }
 
-        public bool Done { get; set; }
+        public PriorityLevel Priority { get; set; }
 
         public DateTime? Reminder { get; set; }
 
-        public PriorityLevel Priority { get; set; }
+        private bool _done;
+        public bool Done
+        {
+            get => _done;
+            set
+            {
+                if (value == true && _done == false)
+                {
+                    DomainEvents.Add(new TodoItemCompletedEvent(this));
+                }
 
-        public TodoList List { get; set; } = new();
+                _done = value;
+            }
+        }
+
+        public TodoList List { get; set; } = null!;
+
+        public List<DomainEvent> DomainEvents { get; set; } = new List<DomainEvent>();
     }
 }
