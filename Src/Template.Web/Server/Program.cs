@@ -1,36 +1,41 @@
-using Microsoft.AspNetCore.ResponseCompression;
+using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Mvc;
+using Template.Application;
+using Template.Infrastructure;
+using Template.Server.Infrastructure.Exstensions;
+using Template.Server.Infrastructure.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
+ConfigurationManager configuration = builder.Configuration;
+IWebHostEnvironment environment = builder.Environment;
 
 // Add services to the container.
+builder.Services.AddApplication();
+builder.Services.AddInfrastructure(configuration);
 
-builder.Services.AddControllersWithViews();
+builder.Services.AddCors();
+builder.Services.Configure<ApplicationSettings>(configuration.GetSection("ApplicationSettings"));
+builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+
+builder.Services.AddTokenAuthentication(configuration);
+
+builder.Services.AddHealthChecks();
+
+builder.Services.AddControllersWithViews(options =>
+                options.Filters.Add<ApiExceptionFilterAttribute>())
+                    .AddFluentValidation();
+
 builder.Services.AddRazorPages();
+
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.SuppressModelStateInvalidFilter = true;
+});
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseWebAssemblyDebugging();
-}
-else
-{
-    app.UseExceptionHandler("/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
-}
-
-app.UseHttpsRedirection();
-
-app.UseBlazorFrameworkFiles();
-app.UseStaticFiles();
-
-app.UseRouting();
-
-
-app.MapRazorPages();
-app.MapControllers();
-app.MapFallbackToFile("index.html");
+await app.UseWebServices(environment)
+   .Initialize();
 
 app.Run();

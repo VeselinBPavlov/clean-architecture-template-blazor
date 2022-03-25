@@ -1,17 +1,15 @@
 ﻿using AutoMapper.QueryableExtensions;
-using Template.Application.Common.Mapping;
-using Template.Application.TodoLists.Queries.GetTodos;
 
 namespace Template.Application.TodoItems.Queries.GetTodoItemsWithPagination
 {
-    public class GetTodoItemsWithPaginationQuery : IRequest<PaginatedList<TodoItemDto>>
+    public class GetTodoItemsWithPaginationQuery : IRequest<PaginatedList<TodoItemBriefDto>>
     {
         public int ListId { get; set; }
         public int PageNumber { get; set; } = 1;
         public int PageSize { get; set; } = 10;
     }
 
-    public class GetTodoItemsWithPaginationQueryHandler : IRequestHandler<GetTodoItemsWithPaginationQuery, PaginatedList<TodoItemDto>>
+    public class GetTodoItemsWithPaginationQueryHandler : IRequestHandler<GetTodoItemsWithPaginationQuery, PaginatedList<TodoItemBriefDto>>
     {
         private readonly IApplicationDbContext _context;
         private readonly IMapper _mapper;
@@ -22,12 +20,12 @@ namespace Template.Application.TodoItems.Queries.GetTodoItemsWithPagination
             _mapper = mapper;
         }
 
-        public async Task<PaginatedList<TodoItemDto>> Handle(GetTodoItemsWithPaginationQuery request, CancellationToken cancellationToken)
+        public async Task<PaginatedList<TodoItemBriefDto>> Handle(GetTodoItemsWithPaginationQuery request, CancellationToken cancellationToken)
         {
             return await _context.TodoItems
                 .Where(x => x.ListId == request.ListId)
                 .OrderBy(x => x.Title)
-                .ProjectTo<TodoItemDto>(_mapper.ConfigurationProvider)
+                .ProjectTo<TodoItemBriefDto>(_mapper.ConfigurationProvider)
                 .PaginatedListAsync(request.PageNumber, request.PageSize); ;
         }
     }

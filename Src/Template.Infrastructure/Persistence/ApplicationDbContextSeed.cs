@@ -6,7 +6,16 @@ namespace Template.Infrastructure.Persistence
 {
     public static class ApplicationDbContextSeed
     {
-        public static async Task SeedDefaultUserAsync(UserManager<User> userManager, RoleManager<IdentityRole> roleManager)
+        public static async Task SeedSampleDataAsync(UserManager<User> userManager, RoleManager<IdentityRole> roleManager, ApplicationDbContext context, CancellationToken cancellationToken)
+        {
+            if (context.TodoItems.Any())
+                return;
+
+            await SeedDefaultUserAsync(userManager, roleManager);
+            await SeedTodosAsync(context);
+        }
+
+        private static async Task SeedDefaultUserAsync(UserManager<User> userManager, RoleManager<IdentityRole> roleManager)
         {
             var administratorRole = new IdentityRole("Administrator");
 
@@ -24,16 +33,13 @@ namespace Template.Infrastructure.Persistence
             }
         }
 
-        public static async Task SeedSampleDataAsync(ApplicationDbContext context)
+        private static async Task SeedTodosAsync(ApplicationDbContext context)
         {
-            // Seed, if necessary
-            if (!context.TodoLists.Any())
+            context.TodoLists.Add(new TodoList
             {
-                context.TodoLists.Add(new TodoList
-                {
-                    Title = "Shopping",
-                    Colour = Colour.Blue,
-                    Items =
+                Title = "Shopping",
+                Colour = Colour.Blue,
+                Items =
                     {
                         new TodoItem { Title = "Apples", Done = true },
                         new TodoItem { Title = "Milk", Done = true },
@@ -44,10 +50,9 @@ namespace Template.Infrastructure.Persistence
                         new TodoItem { Title = "Tuna" },
                         new TodoItem { Title = "Water" }
                     }
-                });
+            });
 
-                await context.SaveChangesAsync();
-            }
+            await context.SaveChangesAsync();
         }
     }
 }
